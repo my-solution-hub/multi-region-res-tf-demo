@@ -31,27 +31,48 @@ export AWS_PROFILE="your-profile-name"
 - EC2, VPC, IAM, EKS, RDS, MemoryDB, S3, ECR
 - Administrative access recommended for initial setup
 
+**AWS China Setup (for Beijing region):**
+
+```bash
+# Configure AWS China profile
+aws configure --profile cn
+# Enter your AWS China credentials and set region to cn-north-1
+```
+
 ## Structure
 
 - `modules/` - Reusable Terraform modules
 - `environments/` - Environment-specific configurations
 - `regions/` - Region-specific configurations with terraform.tfvars
 - `scripts/` - Deployment scripts
+- `backend-configs/` - Remote state backend configurations
 - `main.tf` - Main Terraform configuration
+- `backend.tf` - Backend configuration
 - `variables.tf` - Input variables
 - `outputs.tf` - Output values
+
+## Remote State Storage
+
+Terraform state is stored in S3 buckets:
+- **Global regions** (us-east-1, us-west-2, eu-west-1): `yagr-tfstate-log-us`
+- **China regions** (cn-north-1): `yagr-tfstate-log-cn`
+
+Backend configuration is automatically selected based on the region.
 
 ## Quick Start
 
 ```bash
-# Initialize Terraform
-./scripts/init.sh
+# Initialize Terraform with remote state
+./scripts/init.sh us-east-1
 
 # Plan deployment
 ./scripts/plan.sh dev us-east-1
 
 # Deploy infrastructure
 ./scripts/deploy.sh dev us-east-1
+
+# Deploy to Beijing (requires AWS China profile)
+./scripts/deploy.sh dev cn-north-1 cn
 
 # Destroy infrastructure
 ./scripts/destroy.sh dev us-east-1
@@ -81,6 +102,7 @@ terraform apply -var-file=regions/${TF_VAR_region}/terraform.tfvars -var-file=en
 - us-east-1 (10.0.0.0/16)
 - us-west-2 (10.1.0.0/16)
 - eu-west-1 (10.2.0.0/16)
+- cn-north-1 (10.3.0.0/16) - Beijing, requires AWS China profile
 
 ## Environment Configurations
 
@@ -89,9 +111,11 @@ terraform apply -var-file=regions/${TF_VAR_region}/terraform.tfvars -var-file=en
 - **us-east-1**: db.t4g.micro, 20GB storage
 - **us-west-2**: db.t4g.small, 30GB storage
 - **eu-west-1**: db.t4g.micro, 20GB storage
+- **cn-north-1**: db.t4g.micro, 20GB storage
 
 ### Prod Environment
 
 - **us-east-1**: db.m5.large, 100GB storage
 - **us-west-2**: db.m5.xlarge, 200GB storage
 - **eu-west-1**: db.m5.large, 100GB storage
+- **cn-north-1**: db.m5.large, 100GB storage

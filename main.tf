@@ -10,6 +10,19 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+  
+  # AWS China regions require different endpoints
+  dynamic "endpoints" {
+    for_each = startswith(var.aws_region, "cn-") ? [1] : []
+    content {
+      ec2            = "https://ec2.${var.aws_region}.amazonaws.com.cn"
+      iam            = "https://iam.cn-north-1.amazonaws.com.cn"
+      rds            = "https://rds.${var.aws_region}.amazonaws.com.cn"
+      s3             = "https://s3.${var.aws_region}.amazonaws.com.cn"
+      sts            = "https://sts.${var.aws_region}.amazonaws.com.cn"
+      eks            = "https://eks.${var.aws_region}.amazonaws.com.cn"
+    }
+  }
 }
 
 # VPC using open source module
